@@ -1,0 +1,85 @@
+{# templates/index.html #}
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+        .iframe-container {
+          background-color: #f4f4f4;
+          position: relative;
+          width: 100vw;
+          height: 900px;  /* 固定の高さを設定 */
+          left: 50%;
+          transform: translateX(-50%);
+          margin: 20px;
+          margin:0 auto;
+          overflow: hidden;
+        }
+
+        .iframe-container iframe {
+          width: 100%;
+          height: 100%;   
+        }
+    </style>
+
+<section class="dental-header">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='images/logo02.jpg') }}" alt="渋谷歯科技工所ロゴ">
+    </div>
+    <div class="text-content">
+        <div class="japanese-text">うぐいす歯科技工所</div>
+        <div class="english-text">埼玉県うぐいす町の架空の歯科技工所</div>
+    </div>
+</section>
+
+<h3>〒343-0845 埼玉県うぐいす町4-9-6 うぐいすビル203</h3>
+<h3>E-mail shibuya8020@gmail.com</h3>
+
+<div class="d-flex flex-column gap-3 mb-4 mx-auto" style="max-width: 550px; width: 100%;">
+    <a href="https://line.me/ti/p/9KRzw2ndvX" target="_blank" rel="noopener noreferrer" class="btn" style="background-color: #00B900; color: white;">
+        <b>LINEで連絡</b>
+    </a>
+</div>
+
+<!-- <div class="data_reception01">
+    <h3>データ受付
+        <a href="https://www.dropbox.com/request/QmjTpqLwGWYUNO7uN9dj" target="_blank">自家歯牙移植用レプリカ</a>
+    </h3>
+    <h3>データ受付
+        <a href="https://www.dropbox.com/request/HNiVOXu4pGhKUGxdnP2e" target="_blank">CAD/CAMミリング</a>
+    </h3>
+</div> -->
+
+    <a href="{{ url_for('zip_handler') }}"target="_blank">
+        <div class="data_reception01">
+            
+                <h2>データ受付</h2>
+                <p>CAD/CAMデータ</p>
+                <p> 自家歯牙移植用DICOM</p>
+                <p>CT IOS各種</p>
+        </div></a>
+
+      <!-- <div class="data_reception02_00">
+          <A href="https://us06web.zoom.us/j/84262814694"target="_blank"><h2>ZOOM技工相談室</h2>
+      </div>
+
+        <div class="data_reception02_01"><IMG SRC="shibuya/index/shibuya.jpg"></a></div>
+              
+      </div> -->
+
+            <!-- 埋め込み用のセクション -->
+      <div class="iframe-container">
+          <iframe src="https://uguis-raiden.com/" allowfullscreen></iframe>
+      </div>
+
+<div class="box box1">
+    <a href="{{ url_for('rootreplica') }}">
+        <h2>rootreplica</h2>
+        <h3>自家歯牙移植用3Dドナーレプリカ(歯根レプリカ)</h3>
+        <h3>自家歯牙移植用サージカルガイド</h3>
+        <img src="{{ url_for('static', filename='shibuya/index/rootreplica003.jpg') }}" border="0">
+        <img src="{{ url_for('static', filename='shibuya/index/rootreplica004.jpg') }}" border="0">
+    </a>
+</div>
+
+<!-- Add other content boxes similarly -->
+{% endblock %}
