@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, send_from_directory,request, send_file
+from flask import Flask, render_template, send_from_directory,request, send_file, redirect
 import os
 
 from zip_handler import ZipHandler
@@ -58,6 +58,10 @@ def upload_files():
     except Exception as e:
         print(f"Error occurred: {str(e)}")
         return str(e), 500
+
+@app.route('/zoom')
+def zoom_redirect():
+    return redirect('https://us06web.zoom.us/j/84262814694')
 
 if __name__ == '__main__':
     app.run(debug=True)
