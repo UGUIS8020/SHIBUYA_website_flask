@@ -30,16 +30,12 @@ def gakukotu():
     return render_template('gakukotu.html')
 
 
-@app.route('/color.html')
-def color():
-    return render_template('color.html')
-
 @app.route('/zip_handler.html')
 def zip_handler():
     return render_template('zip_handler.html')
 
-@app.route('/upload', methods=['POST'])
-def upload_files():
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
     if 'files[]' not in request.files:
         return 'ファイルがありません', 400
     
