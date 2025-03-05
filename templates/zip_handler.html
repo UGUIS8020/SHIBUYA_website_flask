@@ -1,193 +1,217 @@
-{% extends "base.html" %}
-{% block title %}ファイル送信{% endblock %}
+{% extends "base.html" %} {% block title %}ファイル送信{% endblock %} {% block
+content %}
 
-{% block content %}
+<title>データ送信</title>
+<style>
+    .drop-zone {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        margin: 20px auto;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        max-width: 800px;
+    }
+    .file-list {
+        margin-top: 20px;
+    }
+    .file-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background-color: #f8f9fa;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    .file-remove {
+        color: red;
+        cursor: pointer;
+        padding: 0 10px;
+    }
+    #status {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    .processing {
+        background-color: #e2e3e5;
+        color: #383d41;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 4px;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% {
+            opacity: 0.6;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0.6;
+        }
+    }
+    .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+    .success {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+</style>
 
-    <title>データ送信</title>
-    <style>       
-        .drop-zone {
-            border: 2px dashed #ccc;
-            padding: 20px;
-            text-align: center;
-            margin: 20px auto;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            max-width: 800px;
-        }
-        .file-list {
-            margin-top: 20px;
-        }
-        .file-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background-color: #f8f9fa;
-            margin-bottom: 5px;
-            border-radius: 4px;
-        }
-        .file-remove {
-            color: red;
-            cursor: pointer;
-            padding: 0 10px;
-        }
-        #status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .processing {
-            background-color: #e2e3e5;
-            color: #383d41;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 4px;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-        }
-    </style>
+<h1>データ送信</h1>
+<div class="drop-zone" id="dropZone">
+    <p>
+        ここにファイルをドラッグ＆ドロップするか、クリックして選択してください
+    </p>
+    <p style="font-size: 0.9em; color: #666">
+        最大ファイルサイズ: 2GB<br />
+        対応ファイル: すべて<br />
+        処理: ZIP圧縮後、Dropboxへ自動アップロード
+    </p>
+    <input type="file" id="fileInput" multiple style="display: none" />
+    <button onclick="document.getElementById('fileInput').click()">
+        ファイルを選択
+    </button>
+</div>
+<div id="status"></div>
+<div id="fileList" class="file-list"></div>
 
-    <h1>データ送信</h1>
-    <div class="drop-zone" id="dropZone">
-        <p>ここにファイルをドラッグ＆ドロップするか、クリックして選択してください</p>
-        <p style="font-size: 0.9em; color: #666;">
-            最大ファイルサイズ: 2GB<br>            
-        </p>
-        <input type="file" id="fileInput" multiple style="display: none;">
-        <button onclick="document.getElementById('fileInput').click()">ファイルを選択</button>
-    </div>
-    <div id="status"></div>
-    <div id="fileList" class="file-list"></div>
+<script>
+    const dropZone = document.getElementById("dropZone");
+    const fileInput = document.getElementById("fileInput");
+    const fileList = document.getElementById("fileList");
+    const status = document.getElementById("status");
 
-    <script>
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const fileList = document.getElementById('fileList');
-        const status = document.getElementById('status');
+    function showStatus(message, type) {
+        status.innerHTML = `<div class="${type}">${message}</div>`;
+    }
 
-        function showStatus(message, type) {
-            status.innerHTML = `<div class="${type}">${message}</div>`;
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        if (bytes < 1024 * 1024 * 1024)
+            return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+        return (bytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
+    }
+
+    function showProcessingStatus(files) {
+        showStatus(
+            `${files.length}個のファイルを処理中...<br>` +
+                `総サイズ: ${formatFileSize(
+                    Array.from(files).reduce(
+                        (total, file) => total + file.size,
+                        0
+                    )
+                )}`,
+            "processing"
+        );
+    }
+
+    async function uploadFiles(files) {
+        showProcessingStatus(files);
+
+        const formData = new FormData();
+        for (const file of files) {
+            formData.append("files[]", file);
         }
 
-        function formatFileSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
-        }
-
-        function showProcessingStatus(files) {
+        try {
             showStatus(
-                `${files.length}個のファイルを処理中...<br>` +
-                `総サイズ: ${formatFileSize(Array.from(files).reduce((total, file) => total + file.size, 0))}`,
-                'processing'
+                "ファイルを圧縮してDropboxにアップロード中...",
+                "processing"
             );
-        }
 
-        async function uploadFiles(files) {
-            showProcessingStatus(files);
-            
-            const formData = new FormData();
-            for (const file of files) {
-                formData.append('files[]', file);
-            }
-
-            try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(await response.text() || 'アップロードに失敗しました');
-                }
-
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = files.length <= 10 ? 'files.zip' : 'compressed_files.zip';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                showStatus('処理が完了しました！', 'success');
-                fileList.innerHTML = '';
-            } catch (error) {
-                console.error('Upload error:', error);
-                showStatus('エラーが発生しました: ' + error.message, 'error');
-            }
-        }
-
-        function handleFiles(files) {
-            const fileArray = Array.from(files);
-            fileList.innerHTML = '';
-            
-            // ファイルサイズのチェック
-            const invalidFiles = fileArray.filter(file => file.size > 2 * 1024 * 1024 * 1024);
-            if (invalidFiles.length > 0) {
-                showStatus(
-                    '以下のファイルは2GBを超えているためアップロードできません：<br>' +
-                    invalidFiles.map(f => f.name).join('<br>'),
-                    'error'
-                );
-                return;
-            }
-
-            // ファイルリストの表示
-            fileArray.forEach(file => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                fileItem.innerHTML = `
-                    <span>${file.name} (${formatFileSize(file.size)})</span>
-                `;
-                fileList.appendChild(fileItem);
+            const response = await fetch("/upload", {
+                method: "POST",
+                body: formData,
             });
 
-            // アップロード開始
-            if (fileArray.length > 0) {
-                uploadFiles(fileArray);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "アップロードに失敗しました");
             }
+
+            const result = await response.json();
+            if (result.success) {
+                showStatus(
+                    `処理が完了しました！<br>Dropboxへのアップロードも成功しました。<br>保存先: ${result.path}`,
+                    "success"
+                );
+            } else {
+                throw new Error(
+                    result.error || "Dropboxへのアップロードに失敗しました"
+                );
+            }
+
+            fileList.innerHTML = "";
+        } catch (error) {
+            console.error("Upload error:", error);
+            showStatus("エラーが発生しました: " + error.message, "error");
+        }
+    }
+
+    function handleFiles(files) {
+        const fileArray = Array.from(files);
+        fileList.innerHTML = "";
+
+        // ファイルサイズのチェック
+        const invalidFiles = fileArray.filter(
+            (file) => file.size > 2 * 1024 * 1024 * 1024
+        );
+        if (invalidFiles.length > 0) {
+            showStatus(
+                "以下のファイルは2GBを超えているためアップロードできません：<br>" +
+                    invalidFiles.map((f) => f.name).join("<br>"),
+                "error"
+            );
+            return;
         }
 
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#666';
+        // ファイルリストの表示
+        fileArray.forEach((file) => {
+            const fileItem = document.createElement("div");
+            fileItem.className = "file-item";
+            fileItem.innerHTML = `
+                    <span>${file.name} (${formatFileSize(file.size)})</span>
+                `;
+            fileList.appendChild(fileItem);
         });
 
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.style.borderColor = '#ccc';
-        });
+        // アップロード開始
+        if (fileArray.length > 0) {
+            uploadFiles(fileArray);
+        }
+    }
 
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#ccc';
-            handleFiles(e.dataTransfer.files);
-        });
+    dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = "#666";
+    });
 
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-        });
-    </script>
-    
-    
-    {% endblock %}
+    dropZone.addEventListener("dragleave", () => {
+        dropZone.style.borderColor = "#ccc";
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = "#ccc";
+        handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener("change", (e) => {
+        handleFiles(e.target.files);
+    });
+</script>
+
+{% endblock %}

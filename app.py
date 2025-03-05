@@ -30,6 +30,10 @@ def gakukotu():
     return render_template('gakukotu.html')
 
 
+@app.route('/colors.html')
+def colors():
+    return render_template('colors.html')
+
 @app.route('/zip_handler.html')
 def zip_handler():
     return render_template('zip_handler.html')
