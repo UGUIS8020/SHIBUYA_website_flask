@@ -58,6 +58,25 @@ def upload_file():
     except Exception as e:
         print(f"Error occurred: {str(e)}")
         return str(e), 500
+    
+@app.route('/upload-images', methods=['GET', 'POST'])
+def upload_images():
+    if 'images[]' not in request.files:
+        return 'ファイルがありません', 400
+    
+    files = request.files.getlist('images[]')
+    if not files or files[0].filename == '':
+        return 'ファイルが選択されていません', 400
+
+    try:
+        # 画像処理関連のコードをここに書く
+        # 例：保存先ディレクトリを作成したり、画像のリサイズなど
+        
+        # 成功したら結果ページにリダイレクトするか、成功メッセージを返す
+        return '画像がアップロードされました', 200
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")
+        return str(e), 500
 
 @app.route('/zoom')
 def zoom_redirect():
