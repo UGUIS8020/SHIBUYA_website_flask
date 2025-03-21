@@ -1,106 +1,48 @@
-{# templates/index.html #}
-{% extends "base.html" %}
-
-{% block content %}
-
-<head>
-    <title>画像色分析</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .error {
-            color: red;
-            margin-bottom: 10px;
-        }
-        .upload-form {
-            border: 2px dashed #ccc;
-            padding: 20px;
-            text-align: center;
-        }
-    </style>
-</head>
-
-    <h1>画像色分析</h1>
-    {% if error %}
-    <div class="error">{{ error }}</div>
-    {% endif %}
-    <div class="upload-form">
-        <form method="post" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".jpg,.jpeg,.png">
-            <input type="submit" value="アップロード&分析">
-        </form>
-    </div>
-</body>
-</html>
-
-<!-- templates/result.html -->
 <!DOCTYPE html>
-<html>
-<head>
-    <title>分析結果</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .images {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .image-container {
-            text-align: center;
-        }
-        .image-container img {
-            max-width: 100%;
-            height: auto;
-        }
-        .colors {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .color-box {
-            padding: 10px;
-            border-radius: 5px;
-            color: white;
-            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
-        }
-        .back-button {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <h1>分析結果</h1>
-    <div class="images">
-        <div class="image-container">
-            <h3>元の画像</h3>
-            <img src="{{ url_for('static', filename=original_image) }}" alt="Original Image">
-        </div>
-        <div class="image-container">
-            <h3>分析結果</h3>
-            <img src="{{ url_for('static', filename=analyzed_image) }}" alt="Analyzed Image">
-        </div>
-    </div>
-    
-    <h2>抽出された色</h2>
-    <div class="colors">
-        {% for color, percent in colors %}
-        <div class="color-box" style="background-color: {{ color }}">
-            {{ color }} ({{ percent }}%)
-        </div>
-        {% endfor %}
-    </div>
-    
-    <div class="back-button">
-        <a href="{{ url_for('upload_images') }}">← 戻る</a>
-    </div>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>カラー分析</title>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='css/styletop.css') }}"
+        />
+        <style>
+            .result-container {
+                margin: 20px auto;
+                max-width: 800px;
+                text-align: center;
+            }
+            .result-image {
+                max-width: 100%;
+                height: auto;
+                margin: 20px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>画像のカラー分析</h1>
+            <form
+                action="{{ url_for('colors') }}"
+                method="post"
+                enctype="multipart/form-data"
+            >
+                <input type="file" name="file" accept="image/*" required />
+                <button type="submit">分析する</button>
+            </form>
 
-    {% endblock %}
+            {% if image_data %}
+            <div class="result-container">
+                <h2>分析結果</h2>
+                <img
+                    src="data:image/png;base64,{{ image_data }}"
+                    alt="分析結果"
+                    class="result-image"
+                />
+            </div>
+            {% endif %}
+        </div>
+    </body>
+</html>

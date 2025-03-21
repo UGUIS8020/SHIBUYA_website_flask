@@ -29,8 +29,7 @@ def rootreplica():
 def gakukotu():
     return render_template('gakukotu.html')
 
-
-@app.route('/colors.html')
+@app.route('/colors.html', methods=['GET', 'POST'])
 def colors():
     return render_template('colors.html')
 
